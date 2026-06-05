@@ -1,10 +1,9 @@
-cat > index.html << 'FIMFINALDEX'
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GALAXILIT - Full DEX + Shooter</title>
+    <title>GALAXILIT - Full Controls</title>
     <link rel="icon" type="image/png" href="images/123.png">
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <style>
@@ -132,7 +131,16 @@ cat > index.html << 'FIMFINALDEX'
         .swap-button { background: transparent; border: 1px solid #0ff; color: #0ff; padding: 10px; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 14px; }
         .swap-button:hover { background: rgba(0,255,255,0.15); }
         .game-container { width: 100%; max-width: 440px; position: relative; }
-        canvas#gameCanvas { display: block; width: 100%; aspect-ratio: 448 / 512; border: 2px solid rgba(0,255,255,0.8); background-color: transparent; cursor: none; border-radius: 16px; }
+        canvas#gameCanvas {
+            display: block;
+            width: 100%;
+            aspect-ratio: 448 / 512;
+            border: 2px solid rgba(0,255,255,0.8);
+            background-color: transparent;
+            cursor: none;
+            border-radius: 16px;
+            touch-action: none;
+        }
         .game-buttons { display: flex; gap: 16px; width: 100%; justify-content: center; }
         .game-btn { background: transparent; border: 1.5px solid #0ff; color: #0ff; font-size: 14px; font-weight: bold; padding: 8px 24px; border-radius: 60px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .game-btn.start { background: rgba(0,255,255,0.1); }
@@ -176,6 +184,18 @@ cat > index.html << 'FIMFINALDEX'
             max-width: 400px;
             width: 90%;
         }
+        .controls-help {
+            font-size: 10px;
+            color: #0ff;
+            text-align: center;
+            background: rgba(0,255,255,0.05);
+            border: 1px dashed rgba(0,255,255,0.3);
+            border-radius: 12px;
+            padding: 6px 10px;
+            margin-top: 4px;
+            line-height: 1.6;
+        }
+        .controls-help strong { color: #ffd700; }
         @media (max-width: 1000px) {
             .main-layout { flex-direction: column; overflow-y: auto; }
             .game-column { min-width: auto; }
@@ -225,7 +245,6 @@ cat > index.html << 'FIMFINALDEX'
                     <input type="number" id="receiveAmount" class="amount-input" placeholder="0.0" value="0" readonly>
                     <button id="swapBtn" class="swap-button">SWAP</button>
                     <button id="addTokenBtn" style="background:transparent; margin-top: 8px;">+ Add Token</button>
-                    <button id="refreshBalancesBtn" style="background:transparent; margin-top: 8px;">🔄 Refresh Balances</button>
                 </div>
             </div>
             <div id="send-content" class="tab-content"><div class="dex-block"><h3>Transfer Token</h3><div class="token-select"><span>Token</span><select id="sendTokenSelect"></select></div><input id="sendTo" class="amount-input" placeholder="Recipient Address"><input id="sendAmount" class="amount-input" placeholder="Amount"><button id="sendBtn" class="swap-button">SEND</button></div></div>
@@ -242,6 +261,10 @@ cat > index.html << 'FIMFINALDEX'
             <div class="game-buttons">
                 <button id="startGameBtn" class="game-btn start" disabled>▶ START GAME</button>
                 <button id="pauseBtn" class="game-btn pause" disabled>⏸ PAUSE</button>
+            </div>
+            <div class="controls-help">
+                🖱️ <strong>MOUSE</strong>: mover nave | <strong>Esq</strong>: tiro simples | <strong>Dir</strong>: tiro duplo | <strong>Ambos</strong>: tiro triplo<br>
+                ⌨️ <strong>B / SPACE</strong>: bomba | <strong>P</strong>: pausar | 📱 <strong>TOQUE</strong>: mover + atirar
             </div>
             <div class="status-text" id="gameStatusText">⚡ DEMO MODE (Attract)</div>
         </div>
@@ -287,7 +310,7 @@ cat > index.html << 'FIMFINALDEX'
     <!-- Three.js import map -->
     <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.128.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.128.0/examples/jsm/"}}</script>
     <script type="module">
-        // ========== SISTEMA SOLAR 3D (código completo, igual ao anterior - omitido por brevidade mas funcional) ==========
+        // ========== SISTEMA SOLAR 3D ==========
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -606,7 +629,7 @@ cat > index.html << 'FIMFINALDEX'
         updateTicker();
         setInterval(updateTicker, 120000);
 
-        // ========== WEB3 + DEX + JOGO (com reconhecimento de tokens da carteira) ==========
+        // ========== WEB3 + DEX ==========
         const NETWORK = { chainName:"LitVM LiteForge", chainId:4441, rpc:"https://liteforge.rpc.caldera.xyz/http" };
         const CONTRACT_ADDR = "0xDbeDB623Fe26ab8Fc403f9495a2D9118909df784";
         const ABI = [
@@ -631,19 +654,15 @@ cat > index.html << 'FIMFINALDEX'
             osc.start(); osc.stop(audioCtx.currentTime+0.1);
         }
 
-        // Lista de tokens conhecidos (pode ser expandida)
         let customTokens = [];
-        let knownTokens = [
-            { address: "0x0000000000000000000000000000000000000000", symbol: "zkLTC", name: "zkLTC", isNative: true },
-            { address: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", symbol: "LTC", name: "Litecoin (Mock)", isNative: false },
-            { address: "0xdAC17F958D2ee523a2206206994597C13D831ec7", symbol: "USDT", name: "Tether USD", isNative: false }, // exemplo
-            { address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", symbol: "USDC", name: "USD Coin", isNative: false }
+        let defaultTokens = [
+            { address:"0x0000000000000000000000000000000000000000", symbol:"zkLTC", name:"zkLTC", isNative:true },
+            { address:"0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", symbol:"LTC", name:"Litecoin Mock", isNative:false }
         ];
-        let allTokens = [...knownTokens];
+        let allTokens = [...defaultTokens];
         let selectedPayToken = 0, selectedReceiveToken = 1;
         let tokenBalances = {};
 
-        // Função para buscar saldos de todos os tokens (inclusive os adicionados)
         async function loadBalances(){
             if(!signer) return;
             const addr = await signer.getAddress();
@@ -652,22 +671,10 @@ cat > index.html << 'FIMFINALDEX'
                 if(t.isNative){
                     const bal = await provider.getBalance(addr);
                     tokenBalances[t.symbol] = ethers.utils.formatEther(bal);
-                } else {
-                    // Tentar buscar saldo do token ERC-20
-                    try {
-                        const contractToken = new ethers.Contract(t.address, ["function balanceOf(address) view returns (uint256)", "function decimals() view returns (uint8)"], signer);
-                        const bal = await contractToken.balanceOf(addr);
-                        const decimals = await contractToken.decimals();
-                        tokenBalances[t.symbol] = ethers.utils.formatUnits(bal, decimals);
-                    } catch(e) {
-                        tokenBalances[t.symbol] = "0.0";
-                        console.warn(`Could not fetch balance for ${t.symbol}`, e);
-                    }
-                }
+                } else { tokenBalances[t.symbol] = "0.0"; }
             }
             updateBalancesUI();
         }
-
         function updateBalancesUI(){
             if(allTokens.length === 0) return;
             if(selectedPayToken >= allTokens.length) selectedPayToken = 0;
@@ -685,39 +692,22 @@ cat > index.html << 'FIMFINALDEX'
             const sendSel = document.getElementById('sendTokenSelect');
             if(sendSel) sendSel.innerHTML = allTokens.map((t,i)=>`<option value="${i}">${t.symbol}</option>`).join('');
         }
-
         function addCustomToken(address,symbol,name){
-            // Verificar se já existe
-            if(allTokens.some(t => t.address.toLowerCase() === address.toLowerCase())) {
-                alert("Token already added");
-                return;
-            }
-            allTokens.push({ address, symbol, name, isNative: false });
+            allTokens.push({ address, symbol, name, isNative:false });
             customTokens.push({ address, symbol, name });
-            localStorage.setItem('customTokens', JSON.stringify(customTokens));
+            localStorage.setItem('customTokens',JSON.stringify(customTokens));
             loadBalances();
         }
-
         function loadCustomTokens(){
             const saved = localStorage.getItem('customTokens');
-            if(saved){
-                customTokens = JSON.parse(saved);
-                // Mesclar sem duplicar
-                const existingAddresses = new Set(knownTokens.map(t => t.address.toLowerCase()));
-                const newTokens = customTokens.filter(t => !existingAddresses.has(t.address.toLowerCase()));
-                allTokens = [...knownTokens, ...newTokens];
-            } else {
-                allTokens = [...knownTokens];
-            }
+            if(saved){ customTokens = JSON.parse(saved); allTokens = [...defaultTokens, ...customTokens]; }
         }
-
         async function executeSwap(){
             const amount = document.getElementById('payAmount').value;
             if(!amount || parseFloat(amount)<=0) return alert("Enter an amount");
             alert(`Swap simulated: ${amount} ${allTokens[selectedPayToken].symbol} → ${allTokens[selectedReceiveToken].symbol}`);
             await loadBalances();
         }
-
         async function sendToken(){
             if(!signer) return alert("Connect your wallet");
             const tokenIdx = document.getElementById('sendTokenSelect').value;
@@ -730,14 +720,13 @@ cat > index.html << 'FIMFINALDEX'
                 const tx = await signer.sendTransaction({ to, value: ethers.utils.parseEther(amount) });
                 await tx.wait();
             } else {
-                // Simulação para tokens ERC-20 (na prática precisaria do contrato real)
                 alert(`Mock token transfer: ${amount} ${token.symbol} to ${to} (simulated)`);
             }
             alert("Transaction sent!");
             await loadBalances();
         }
 
-        // ========== JOGO (código completo, já testado) ==========
+        // ========== JOGO COM CONTROLES FUNCIONAIS ==========
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         let gameState = "ATTRACT";
@@ -755,6 +744,11 @@ cat > index.html << 'FIMFINALDEX'
         let player = { invincible:0, shield:0, lastBomb:-20000, bombCd:20000, fastShot:0, doubleScore:0, lastSingle:0, lastDouble:0, lastCombo:0, muzzle:0 };
         let aiShootTimer = 0;
 
+        // ====== NOVO: Variáveis para controle por teclado (WASD/Setas) ======
+        const keysPressed = { ArrowUp:false, ArrowDown:false, ArrowLeft:false, ArrowRight:false, w:false, a:false, s:false, d:false };
+        const PLAYER_SPEED = 6;
+
+        // Imagens
         const playerShips = []; for(let i=1;i<=5;i++){let img=new Image(); img.src=`images/Ship_${i}.png`; playerShips.push(img);}
         const enemyImgs={black:[],blue:[],green:[],red:[]};
         for(let i=1;i<=5;i++){
@@ -774,12 +768,13 @@ cat > index.html << 'FIMFINALDEX'
         const laserGreenFrames=[]; for(let i=13;i<=15;i++){let l=new Image(); l.src=`images/laserGreen${i}.png`; laserGreenFrames.push(l);}
         function getEnemyImage(type,idx){let arr=type==="scout"?enemyImgs.black:type==="fighter"?enemyImgs.blue:type==="bomber"?enemyImgs.green:enemyImgs.red; let i=(type==="boss")?4:idx%5; return arr[i];}
 
+        // Classes
         class Star { constructor(){ this.reset(); } reset(){ this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.speed=0.5+Math.random()*1.5; this.size=1+Math.random()*1; this.alpha=0.5+Math.random()*0.5; this.tw=0.02+Math.random()*0.03; this.phase=Math.random()*Math.PI*2; } update(){ this.y+=this.speed; if(this.y>canvas.height){ this.y=0; this.x=Math.random()*canvas.width; } this.alpha=0.5+0.5*Math.sin(Date.now()*this.tw+this.phase); } draw(){ ctx.fillStyle=`rgba(255,255,255,${this.alpha})`; ctx.fillRect(this.x,this.y,this.size,this.size); } }
         class Particle { constructor(x,y,col){ this.x=x;this.y=y;this.col=col; this.vx=(Math.random()-0.5)*5; this.vy=(Math.random()-0.5)*5; this.life=20; } update(){ this.x+=this.vx; this.y+=this.vy; this.life--; } draw(){ ctx.fillStyle=this.col; ctx.fillRect(this.x,this.y,3,3); } }
         class PlayerBullet { constructor(x,y,vy,vx,color){ this.x=x;this.y=y;this.vy=vy;this.vx=vx; this.frame=0; this.animDelay=0; this.w=24;this.h=24; this.color=color; } update(){ this.x+=this.vx; this.y+=this.vy; this.animDelay++; if(this.animDelay>2){ this.frame=(this.frame+1)%fireBulletFrames.length; this.animDelay=0; } return this.y<0||this.y>canvas.height||this.x<0||this.x>canvas.width; } draw(){ let img=fireBulletFrames[this.frame]; if(img&&img.complete&&img.naturalWidth>0) ctx.drawImage(img,this.x-this.w/2,this.y-this.h/2,this.w,this.h); else{ ctx.fillStyle=this.color; ctx.fillRect(this.x-4,this.y-8,8,16); } } }
         class EnemyBullet { constructor(x,y,vy,type="blue"){ this.x=x;this.y=y;this.vy=vy;this.type=type; this.frame=0;this.animDelay=0;this.w=16;this.h=24; this.frames=type==="green"?laserGreenFrames:[laserBlue]; } update(){ this.y+=this.vy; if(this.type==="green"){ this.animDelay++; if(this.animDelay>3){ this.frame=(this.frame+1)%this.frames.length; this.animDelay=0; } } return this.y<0||this.y>canvas.height||this.x<0||this.x>canvas.width; } draw(){ let img=this.frames[this.frame]; if(img&&img.complete&&img.naturalWidth>0) ctx.drawImage(img,this.x-this.w/2,this.y-this.h/2,this.w,this.h); else{ ctx.fillStyle=this.type==="blue"?"#00a0ff":"#00ff88"; ctx.fillRect(this.x-3,this.y-12,6,20); } } }
         class PowerUp { constructor(x,y,type){ this.x=x;this.y=y;this.type=type; } update(){ this.y+=2.5; return this.y>canvas.height; } draw(){ let color={SHIELD:"#00a0ff",LIFE:"#ff3366",FAST:"#ffd700",BOMB:"#ff6600",DOUBLE:"#00e678"}[this.type]; ctx.fillStyle=color; ctx.beginPath(); ctx.arc(this.x,this.y,9,0,Math.PI*2); ctx.fill(); ctx.fillStyle="#000"; ctx.font="bold 12px monospace"; ctx.fillText(this.type[0],this.x-4,this.y+4); } }
-        class Meteor { constructor(x,y,type){ this.x=x;this.y=y;this.type=type; let arr=meteorImgs[type]; this.img=arr[Math.floor(Math.random()*arr.length)]; this.size=type==="big"?28:type==="med"?20:12; this.hp=type==="big"?3:type==="med"?2:1; this.speed=2+(playerLevel*0.5); } update(){ this.y+=this.speed; return this.y>canvas.height; } draw(){ if(this.img&&this.img.complete&&this.img.naturalWidth>0) ctx.drawImage(this.img,this.x-this.size/2,this.y-this.size/2,this.size,this.size); else{ ctx.fillStyle="#brown"; ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size); } } }
+        class Meteor { constructor(x,y,type){ this.x=x;this.y=y;this.type=type; let arr=meteorImgs[type]; this.img=arr[Math.floor(Math.random()*arr.length)]; this.size=type==="big"?28:type==="med"?20:12; this.hp=type==="big"?3:type==="med"?2:1; this.speed=2+(playerLevel*0.5); } update(){ this.y+=this.speed; return this.y>canvas.height; } draw(){ if(this.img&&this.img.complete&&this.img.naturalWidth>0) ctx.drawImage(this.img,this.x-this.size/2,this.y-this.size/2,this.size,this.size); else{ ctx.fillStyle="#8b4513"; ctx.fillRect(this.x-this.size/2,this.y-this.size/2,this.size,this.size); } } }
         class Enemy { constructor(row,col,type,bonus){ this.type=type; this.hp=type==="scout"?1:type==="fighter"?2:type==="bomber"?3:type==="destroyer"?4:8; this.tx=45+col*36; this.ty=65+row*30; this.x=canvas.width/2; this.y=-40; this.state="ENTER"; this.anim=0; this.hit=0; this.beam=false; this.size=type==="boss"?42:28; this.img=getEnemyImage(type,row); } update(){ this.anim++; if(this.hit>0) this.hit--; let spd=Math.min(3.2,1+stage*0.12+playerLevel*0.05); if(this.state==="ENTER"){ let dx=this.tx-this.x, dy=this.ty-this.y, d=Math.hypot(dx,dy); if(d<8) this.state="FORM"; else{ this.x+=(dx/d)*4*spd; this.y+=(dy/d)*4*spd; } } else if(this.state==="FORM"){ this.x=this.tx+Math.sin(Date.now()*0.0025)*12*spd; this.y=this.ty; if(Math.random()<0.0015*spd) this.state="DIVE"; } else if(this.state==="DIVE"){ let ds=(this.type==="destroyer"?6:(this.type==="boss"?4:4.5))*spd; this.y+=ds; this.x+=Math.sin(this.anim*0.1)*4; if(this.type==="boss"&&this.y>180&&this.y<280) this.beam=true; else{ this.beam=false; if(Math.random()<0.025*spd){ let lt=(this.type==="scout"||this.type==="fighter")?"blue":"green"; enemyBullets.push(new EnemyBullet(this.x,this.y+12,5*spd,lt)); } } if(this.y>canvas.height){ this.y=-30; this.state="ENTER"; this.beam=false; } } } draw(){ ctx.save(); ctx.translate(this.x,this.y); if(this.hit>0){ ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(0,0,this.size/2+4,0,Math.PI*2); ctx.fill(); } else if(this.img&&this.img.complete&&this.img.naturalWidth>0) ctx.drawImage(this.img,-this.size/2,-this.size/2,this.size,this.size); else{ ctx.fillStyle="#ffaa33"; ctx.beginPath(); ctx.ellipse(0,0,14,16,0,0,Math.PI*2); ctx.fill(); } ctx.restore(); } }
         class Boss { constructor(levelNum){ this.lvl=Math.min(levelNum,5); this.x=canvas.width/2; this.y=80; this.w=80; this.h=80; this.hp=20+this.lvl*10; this.maxHp=this.hp; this.sx=1.5; this.dir=1; this.cd=0; this.img=bossImages[this.lvl-1]; this.hit=0; } update(){ if(this.hit>0) this.hit--; this.x+=this.sx*this.dir; if(this.x<60) this.dir=1; if(this.x>canvas.width-60) this.dir=-1; this.cd--; if(this.cd<=0){ let delay=Math.max(15,30-this.lvl*2); this.cd=delay; let shots=Math.min(5,1+Math.floor(this.lvl/2)); for(let i=0;i<shots;i++){ let ang=(i-(shots-1)/2)*0.3; let b=new EnemyBullet(this.x+(i*10-20),this.y+30,4,"green"); b.vx=ang; enemyBullets.push(b); } if(this.lvl>=3){ for(let i=-1;i<=1;i++){ let b=new EnemyBullet(this.x,this.y+40,5,"green"); b.vx=i*1.5; enemyBullets.push(b); } } if(Math.random()<0.3){ enemyBullets.push(new EnemyBullet(this.x-20,this.y+20,6,"blue")); enemyBullets.push(new EnemyBullet(this.x+20,this.y+20,6,"blue")); } } } draw(){ ctx.save(); ctx.translate(this.x,this.y); if(this.hit>0){ ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(0,0,this.w/2+8,0,Math.PI*2); ctx.fill(); } else if(this.img&&this.img.complete&&this.img.naturalWidth>0) ctx.drawImage(this.img,-this.w/2,-this.h/2,this.w,this.h); else{ ctx.fillStyle="#ff0066"; ctx.beginPath(); ctx.ellipse(0,0,35,40,0,0,Math.PI*2); ctx.fill(); } ctx.fillStyle="#2a2a4a"; ctx.fillRect(-this.w/2,-this.h/2-15,this.w,8); let pct=this.hp/this.maxHp; ctx.fillStyle=pct>0.6?"#0f0":pct>0.3?"#ff0":"#f00"; ctx.fillRect(-this.w/2,-this.h/2-15,this.w*pct,8); ctx.restore(); } }
 
@@ -792,6 +787,7 @@ cat > index.html << 'FIMFINALDEX'
             if(bullets.length >= (playerLevel===1?4: playerLevel===2?6: playerLevel===3?8: playerLevel===4?10:12)) return;
             let baseColor = ["#ffd700","#00a0ff","#ffffff","#ffaa00","#ff44ff"][playerLevel-1];
             bullets.push(new PlayerBullet(mouseX, mouseY-15, -14, 0, baseColor));
+            player.muzzle = 6;
             playSound('laser');
         }
         function fireDouble() {
@@ -799,6 +795,7 @@ cat > index.html << 'FIMFINALDEX'
             let baseColor = ["#ffd700","#00a0ff","#ffffff","#ffaa00","#ff44ff"][playerLevel-1];
             bullets.push(new PlayerBullet(mouseX-10, mouseY-15, -14, -1.2, baseColor));
             bullets.push(new PlayerBullet(mouseX+10, mouseY-15, -14, 1.2, baseColor));
+            player.muzzle = 6;
             playSound('laser');
         }
         function fireTriple() {
@@ -807,6 +804,7 @@ cat > index.html << 'FIMFINALDEX'
             bullets.push(new PlayerBullet(mouseX, mouseY-18, -16, 0, baseColor));
             bullets.push(new PlayerBullet(mouseX-12, mouseY-15, -15, -1.5, baseColor));
             bullets.push(new PlayerBullet(mouseX+12, mouseY-15, -15, 1.5, baseColor));
+            player.muzzle = 6;
             playSound('laser');
         }
         function bomb(){ let now=Date.now(); if(now-player.lastBomb>=player.bombCd){ player.lastBomb=now; shake=20; shakeIntensity=12; playSound('bomb'); enemies.forEach(e=>{for(let i=0;i<20;i++) particles.push(new Particle(e.x,e.y,"#ff8000"));}); meteors.forEach(m=>{for(let i=0;i<10;i++) particles.push(new Particle(m.x,m.y,"#ff8800"));}); score+=(enemies.length*150)+(meteors.length*50); enemies=[]; meteors=[]; enemyBullets=[]; updateLevel(); } }
@@ -818,10 +816,55 @@ cat > index.html << 'FIMFINALDEX'
         spawnStage();
 
         function togglePause() { if(gameState === "PLAYING") { gamePaused = !gamePaused; const pauseBtn = document.getElementById('pauseBtn'); if(pauseBtn) pauseBtn.innerHTML = gamePaused ? "▶️ RESUME" : "⏸ PAUSE"; document.getElementById('gameStatusText').innerHTML = gamePaused ? "⏸️ PAUSED (press P to resume)" : "🎮 PLAYING (your control)"; } }
-        function updateAttractAI() { if(!attractModeActive || gamePaused) return; let closest = null, minDist = Infinity; for(let e of enemies) { let d = Math.hypot(e.x - mouseX, e.y - mouseY); if(d < minDist) { minDist = d; closest = e; } } if(closest) { let dx = closest.x - mouseX, dy = closest.y - mouseY, angle = Math.atan2(dy, dx); let targetX = mouseX + Math.cos(angle) * 2, targetY = mouseY + Math.sin(angle) * 2; mouseX = Math.min(canvas.width-25, Math.max(25, targetX)); mouseY = Math.min(canvas.height-40, Math.max(40, targetY)); } else { mouseX += (Math.random() - 0.5) * 3; mouseY += (Math.random() - 0.5) * 2; mouseX = Math.min(canvas.width-25, Math.max(25, mouseX)); mouseY = Math.min(canvas.height-40, Math.max(40, mouseY)); } aiShootTimer--; if(aiShootTimer <= 0) { fireSingle(); aiShootTimer = 10 + Math.random() * 10; } if(Math.random() < 0.002) bomb(); }
+
+        // ====== NOVO: AI do modo ATTRACT (variáveis separadas para não conflitar) ======
+        let aiMouseX = canvas.width/2, aiMouseY = canvas.height-60;
+        function updateAttractAI() {
+            if(!attractModeActive || gamePaused) return;
+            let closest = null, minDist = Infinity;
+            for(let e of enemies) {
+                let d = Math.hypot(e.x - aiMouseX, e.y - aiMouseY);
+                if(d < minDist) { minDist = d; closest = e; }
+            }
+            if(closest) {
+                let dx = closest.x - aiMouseX, dy = closest.y - aiMouseY;
+                let angle = Math.atan2(dy, dx);
+                aiMouseX += Math.cos(angle) * 2;
+                aiMouseY += Math.sin(angle) * 2;
+            } else {
+                aiMouseX += (Math.random() - 0.5) * 3;
+                aiMouseY += (Math.random() - 0.5) * 2;
+            }
+            aiMouseX = Math.min(canvas.width-25, Math.max(25, aiMouseX));
+            aiMouseY = Math.min(canvas.height-40, Math.max(40, aiMouseY));
+            // Sincroniza com mouseX/Y apenas no modo ATTRACT
+            mouseX = aiMouseX;
+            mouseY = aiMouseY;
+            aiShootTimer--;
+            if(aiShootTimer <= 0) { fireSingle(); aiShootTimer = 10 + Math.random() * 10; }
+            if(Math.random() < 0.002) bomb();
+        }
+
+        // ====== NOVO: Atualiza movimento por teclado (WASD/Setas) ======
+        function updateKeyboardMovement() {
+            if(gameState !== "PLAYING" || gamePaused) return;
+            let dx = 0, dy = 0;
+            if(keysPressed.ArrowLeft || keysPressed.a) dx -= 1;
+            if(keysPressed.ArrowRight || keysPressed.d) dx += 1;
+            if(keysPressed.ArrowUp || keysPressed.w) dy -= 1;
+            if(keysPressed.ArrowDown || keysPressed.s) dy += 1;
+            if(dx !== 0 || dy !== 0) {
+                let len = Math.hypot(dx, dy);
+                mouseX += (dx/len) * PLAYER_SPEED;
+                mouseY += (dy/len) * PLAYER_SPEED;
+                mouseX = Math.min(canvas.width-20, Math.max(20, mouseX));
+                mouseY = Math.min(canvas.height-20, Math.max(20, mouseY));
+            }
+        }
 
         function gameLoop(){
             if(gameState === "ATTRACT") updateAttractAI();
+            if(gameState === "PLAYING" && !gamePaused) updateKeyboardMovement();
             if(gameState !== "PLAYING" && gameState !== "ATTRACT") return;
             if(!gamePaused) {
                 if(player.invincible>0) player.invincible--;
@@ -829,22 +872,31 @@ cat > index.html << 'FIMFINALDEX'
                 if(player.muzzle>0) player.muzzle--;
                 if(player.fastShot>0){ player.fastShot--; if(player.fastShot<=0) player.bombCd=20000; }
                 if(player.doubleScore>0) player.doubleScore--;
-                // Rastros mínimos (1% de chance)
-                if(Math.random() < 0.01 && gameState==="PLAYING") 
+                if(Math.random() < 0.01 && gameState==="PLAYING")
                     particles.push(new Particle(mouseX+(Math.random()-0.5)*12, mouseY+10, "#00fff0"));
-                if(gameState !== "ATTRACT") {
+                // Disparos manuais (SOMENTE no modo PLAYING, não no ATTRACT)
+                if(gameState === "PLAYING") {
                     if(leftClick && rightClick) {
                         let now = Date.now();
                         let rate = player.fastShot>0 ? 60 : 120;
-                        if(now - player.lastCombo > rate) { fireTriple(); player.lastCombo = now; }
+                        if(now - player.lastCombo > rate) {
+                            fireTriple();
+                            player.lastCombo = now;
+                        }
                     } else if(rightClick) {
                         let now = Date.now();
                         let rate = player.fastShot>0 ? 80 : 150;
-                        if(now - player.lastDouble > rate) { fireDouble(); player.lastDouble = now; }
+                        if(now - player.lastDouble > rate) {
+                            fireDouble();
+                            player.lastDouble = now;
+                        }
                     } else if(leftClick) {
                         let now = Date.now();
                         let rate = player.fastShot>0 ? 100 : 200;
-                        if(now - player.lastSingle > rate) { fireSingle(); player.lastSingle = now; }
+                        if(now - player.lastSingle > rate) {
+                            fireSingle();
+                            player.lastSingle = now;
+                        }
                     }
                 }
                 bullets=bullets.filter(b=>!b.update()&&(b.draw(),true));
@@ -861,7 +913,9 @@ cat > index.html << 'FIMFINALDEX'
             } else {
                 stars.forEach(s=>{ s.draw(); });
             }
-            // UI
+            // UI no canvas
+            ctx.save();
+            if(shake>0){ ctx.translate((Math.random()-0.5)*shakeIntensity, (Math.random()-0.5)*shakeIntensity); shake--; }
             ctx.fillStyle="#ff3366"; ctx.font="bold 14px monospace"; ctx.fillText("PILOT",20,25);
             let displayName = (gameState === "ATTRACT") ? "DEMO MODE" : (currentNickname||"---").toUpperCase();
             ctx.fillStyle="#0ff"; ctx.fillText(displayName,20,45);
@@ -885,6 +939,7 @@ cat > index.html << 'FIMFINALDEX'
             if(playerImg&&playerImg.complete&&playerImg.naturalWidth>0){ let sz=32; ctx.drawImage(playerImg,-sz/2,-sz/2,sz,sz); } else{ ctx.fillStyle="#fff"; ctx.beginPath(); ctx.moveTo(0,-22); ctx.lineTo(14,4); ctx.lineTo(6,16); ctx.lineTo(0,22); ctx.lineTo(-6,16); ctx.lineTo(-14,4); ctx.fill(); }
             if(player.muzzle>0){ ctx.fillStyle="#ff0"; ctx.fillRect(-6,-28,12,8); ctx.fillStyle="#fa0"; ctx.fillRect(-10,-32,20,6); }
             ctx.restore();
+            ctx.restore();
         }
 
         function draw(){
@@ -902,15 +957,128 @@ cat > index.html << 'FIMFINALDEX'
                 ctx.fillStyle="#0ff"; ctx.fillText("CONNECT METAMASK",120,260);
             } else if(gameState === "GAME_OVER"){
                 ctx.fillStyle="rgba(0,0,0,0.85)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-                ctx.fillStyle="#f0064"; ctx.font="bold 28px monospace"; ctx.fillText("GAME OVER",canvas.width/2-120,canvas.height/2-40);
+                ctx.fillStyle="#ff0064"; ctx.font="bold 28px monospace"; ctx.fillText("GAME OVER",canvas.width/2-120,canvas.height/2-40);
                 ctx.fillStyle="#fff"; ctx.fillText("PRESS START TO PLAY AGAIN",canvas.width/2-130,canvas.height/2+30);
             }
-            if(shake>0){ ctx.translate((Math.random()-0.5)*shakeIntensity, (Math.random()-0.5)*shakeIntensity); shake--; }
             requestAnimationFrame(draw);
         }
         draw();
 
-        // Web3 e integração
+        // ============================================================
+        // ============ CONTROLES DO JOGO (A CORREÇÃO PRINCIPAL) =======
+        // ============================================================
+
+        // Converte coordenadas da tela para coordenadas do canvas
+        function getCanvasCoords(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        // ===== MOUSE: mover a nave =====
+        canvas.addEventListener('mousemove', (e) => {
+            // Só atualiza mouseX/Y via mouse quando NÃO está em ATTRACT
+            // (em ATTRACT, a AI controla)
+            if (gameState === "PLAYING" && !gamePaused) {
+                const coords = getCanvasCoords(e.clientX, e.clientY);
+                mouseX = Math.min(canvas.width-20, Math.max(20, coords.x));
+                mouseY = Math.min(canvas.height-20, Math.max(20, coords.y));
+            }
+        });
+
+        // ===== MOUSE: botões de tiro =====
+        canvas.addEventListener('mousedown', (e) => {
+            if (gameState !== "PLAYING" || gamePaused) return;
+            enableSound();
+            if (e.button === 0) leftClick = true;
+            if (e.button === 2) rightClick = true;
+        });
+        canvas.addEventListener('mouseup', (e) => {
+            if (e.button === 0) leftClick = false;
+            if (e.button === 2) rightClick = false;
+        });
+        // Perde foco da janela → solta os cliques
+        window.addEventListener('blur', () => {
+            leftClick = false;
+            rightClick = false;
+            Object.keys(keysPressed).forEach(k => keysPressed[k] = false);
+        });
+        canvas.addEventListener('mouseleave', () => {
+            leftClick = false;
+            rightClick = false;
+        });
+        // Bloqueia menu de contexto do botão direito
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+
+        // ===== TECLADO: movimento WASD/Setas + bomba (B/Space) + pausa (P) =====
+        window.addEventListener('keydown', (e) => {
+            const key = e.key;
+            if (key in keysPressed) {
+                keysPressed[key] = true;
+                e.preventDefault();
+            }
+            // Bomba
+            if ((key === 'b' || key === 'B' || key === ' ') && gameState === "PLAYING" && !gamePaused) {
+                bomb();
+                e.preventDefault();
+            }
+            // Pausa
+            if ((key === 'p' || key === 'P') && (gameState === "PLAYING" || gamePaused)) {
+                togglePause();
+                e.preventDefault();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            const key = e.key;
+            if (key in keysPressed) {
+                keysPressed[key] = false;
+                e.preventDefault();
+            }
+        });
+
+        // ===== TOUCH: suporte mobile =====
+        let touchActive = false;
+        let touchShootTimer = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gameState !== "PLAYING") return;
+            enableSound();
+            touchActive = true;
+            const touch = e.touches[0];
+            const coords = getCanvasCoords(touch.clientX, touch.clientY);
+            mouseX = Math.min(canvas.width-20, Math.max(20, coords.x));
+            mouseY = Math.min(canvas.height-20, Math.max(20, coords.y));
+            leftClick = true;
+        }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (gameState !== "PLAYING" || !touchActive) return;
+            const touch = e.touches[0];
+            const coords = getCanvasCoords(touch.clientX, touch.clientY);
+            mouseX = Math.min(canvas.width-20, Math.max(20, coords.x));
+            mouseY = Math.min(canvas.height-20, Math.max(20, coords.y));
+        }, { passive: false });
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            touchActive = false;
+            leftClick = false;
+            rightClick = false;
+        }, { passive: false });
+        canvas.addEventListener('touchcancel', (e) => {
+            touchActive = false;
+            leftClick = false;
+            rightClick = false;
+        });
+
+        // ============================================================
+
         async function initWeb3() {
             if (!window.ethereum) { alert("MetaMask not installed!"); return; }
             try {
@@ -948,7 +1116,6 @@ cat > index.html << 'FIMFINALDEX'
                 alert("Failed to connect wallet. Please ensure MetaMask is installed and you're on the correct network.");
             }
         }
-
         async function register() {
             const nick = document.getElementById('nick-field').value.trim();
             if (!nick) return alert("Enter a nickname");
@@ -959,7 +1126,6 @@ cat > index.html << 'FIMFINALDEX'
             document.getElementById('startGameBtn').disabled = false;
             document.getElementById('gameStatusText').innerHTML = "✅ Ready to start";
         }
-
         async function updateLeaderboard() {
             if (!contract) return;
             const raw = await contract.getLeaderboard();
@@ -972,13 +1138,11 @@ cat > index.html << 'FIMFINALDEX'
             }
             tbody.innerHTML = ranking.map(p => `<tr><td>${p.nickname}</td><td>${p.score}</td><td>${p.message || ''}</td></tr>`).join('');
         }
-
         async function submitScore(score, msg) {
             if (!contract) return;
             await contract.submitScore(score, msg);
             await updateLeaderboard();
         }
-
         async function payFeeAndStart() {
             if (!signer) return alert("Connect wallet first");
             const addr = await signer.getAddress();
@@ -1007,7 +1171,6 @@ cat > index.html << 'FIMFINALDEX'
                 alert("Payment failed: " + err.message);
             }
         }
-
         document.getElementById('connectBtnHeader').onclick = initWeb3;
         document.getElementById('payBtn').onclick = register;
         document.getElementById('broadcastBtn').onclick = async () => { let msg = document.getElementById('msg-field').value.trim() || "Victory!"; await submitScore(score, msg); document.getElementById('overlay-message').style.display = 'none'; gameState = "GAME_OVER"; };
@@ -1018,13 +1181,7 @@ cat > index.html << 'FIMFINALDEX'
         };
         document.getElementById('pauseBtn').onclick = togglePause;
 
-        // Refresh balances button
-        document.getElementById('refreshBalancesBtn').addEventListener('click', async () => {
-            if (signer) await loadBalances();
-            else alert("Connect wallet first");
-        });
-
-        // Navegação das abas
+        // Navegação das abas do header
         const headerBtns = document.querySelectorAll('.header-left .header-btn');
         const tabContents = {
             swap: document.getElementById('swap-content'),
@@ -1042,7 +1199,7 @@ cat > index.html << 'FIMFINALDEX'
         });
         if(tabContents.swap) tabContents.swap.style.display = 'block';
 
-        // Opacity slider
+        // Slider de opacidade
         const slider = document.getElementById('opacitySlider');
         const sections = document.querySelectorAll('.dex-block, .panel-section, .leaderboard-box, .welcome-banner');
         function updateOpacity(val) { const op = val/100; sections.forEach(el => el.style.backgroundColor = `rgba(0,0,0,${op})`); }
@@ -1080,4 +1237,3 @@ cat > index.html << 'FIMFINALDEX'
     </script>
 </body>
 </html>
-FIMFINALDEX
